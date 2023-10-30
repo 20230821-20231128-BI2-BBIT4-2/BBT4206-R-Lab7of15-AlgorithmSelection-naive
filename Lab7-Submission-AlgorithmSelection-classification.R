@@ -197,27 +197,30 @@ if (require("rpart")) {
 # model using ordinary least squares (OLS).
 
 #### Load and split the dataset ----
-data(BostonHousing)
-View(BostonHousing)
+library(readr)
+USA_Housing <- read_csv("data/USA_Housing.csv")
+View(USA_Housing)
+
+
 # Define an 80:20 train:test data split of the dataset.
-train_index <- createDataPartition(BostonHousing$medv,
+train_index <- createDataPartition(USA_Housing$Price,
                                    p = 0.8,
                                    list = FALSE)
-boston_housing_train <- BostonHousing[train_index, ]
-boston_housing_test <- BostonHousing[-train_index, ]
+USA_Housing_train <- USA_Housing[train_index, ]
+USA_Housing_test <- USA_Housing[-train_index, ]
 
 #### Train the model ----
-boston_housing_model_lm <- lm(medv ~ ., boston_housing_train)
+USA_Housing_model_lm <- lm(Price ~ ., USA_Housing_train)
 
 #### Display the model's details ----
-print(boston_housing_model_lm)
+print(USA_Housing_model_lm)
 
 #### Make predictions ----
-predictions <- predict(boston_housing_model_lm, boston_housing_test[, 1:13])
+predictions <- predict(USA_Housing_model_lm, USA_Housing_test[, 1:6])
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
-rmse <- sqrt(mean((boston_housing_test$medv - predictions)^2))
+rmse <- sqrt(mean((USA_Housing_test$Price - predictions)^2))
 print(paste("RMSE =", sprintf(rmse, fmt = "%#.4f")))
 
 ##### SSR ----
@@ -249,19 +252,21 @@ print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
 ### 1.b. Linear Regression using Ordinary Least Squares with caret ----
 #### Load and split the dataset ----
-data(BostonHousing)
+library(readr)
+USA_Housing <- read_csv("data/USA_Housing.csv")
+View(USA_Housing)
 
 # Define an 80:20 train:test data split of the dataset.
-train_index <- createDataPartition(BostonHousing$medv,
+train_index <- createDataPartition(USA_Housing$Price,
                                    p = 0.8,
                                    list = FALSE)
-boston_housing_train <- BostonHousing[train_index, ]
-boston_housing_test <- BostonHousing[-train_index, ]
+USA_Housing_train <- USA_Housing[train_index, ]
+USA_Housing_test <- USA_Housing[-train_index, ]
 
 #### Train the model ----
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 5)
-boston_housing_caret_model_lm <- train(medv ~ ., data = boston_housing_train,
+USA_Housing_caret_model_lm <- train(Price ~ ., data = USA_Housing_train,
                                        method = "lm", metric = "RMSE",
                                        preProcess = c("center", "scale"),
                                        trControl = train_control)
