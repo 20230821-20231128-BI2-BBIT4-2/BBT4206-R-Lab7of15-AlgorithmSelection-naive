@@ -610,7 +610,7 @@ tr <-
 print(tr)
 summary(tr)
 
-### OPTION 2 ----
+ ### OPTION 2 ----
 tr_stock_code <-
   read.transactions("data/transactions_basket_format_online_retail_stock.csv",
     format = "basket",
@@ -632,13 +632,13 @@ summary(tr_stock_code)
 
 # STEP 2. Basic EDA ----
 # Create an item frequency plot for the top 10 items
-itemFrequencyPlot(tr_stock_code, topN = 10, type = "absolute",
+itemFrequencyPlot(tr, topN = 10, type = "absolute",
                   col = brewer.pal(8, "Pastel2"),
                   main = "Absolute Item Frequency Plot",
                   horiz = TRUE,
                   mai = c(2, 2, 2, 2))
 
-itemFrequencyPlot(tr_stock_code, topN = 10, type = "relative",
+itemFrequencyPlot(tr, topN = 10, type = "relative",
                   col = brewer.pal(8, "Pastel2"),
                   main = "Relative Item Frequency Plot",
                   horiz = TRUE,

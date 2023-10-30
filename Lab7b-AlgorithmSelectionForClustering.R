@@ -248,6 +248,20 @@ if (require("ggcorrplot")) {
   install.packages("ggcorrplot", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+## dplyr ----
+if (require("dplyr")) {
+  require("dplyr")
+} else {
+  install.packages("dplyr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
 
 # STEP 2. Load the Dataset ----
 # Source: http://insideairbnb.com/cape-town/
@@ -313,7 +327,9 @@ gg_miss_upset(airbnb_cape_town)
 # Where are missing values located (the shaded regions in the plot)?
 vis_miss(airbnb_cape_town) +
   theme(axis.text.x = element_text(angle = 80))
-
+airbnb_cape_town_removed_obs <-
+  airbnb_cape_town %>%
+  dplyr::filter(complete.cases(.))
 ## OPTION 1: Remove the observations with missing values ----
 # We can decide to remove all the observations that have missing values
 # as follows:
