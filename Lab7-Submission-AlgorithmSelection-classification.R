@@ -319,6 +319,9 @@ predictions <- predict(diabetes_lda,
                        diabetes_test[, 1:8])$Outcome
 
 #### Display the model's evaluation metrics ----
+expected_levels <- c("pos","neg")
+diabetes_test[,1:9]$Outcome <-factor(diabetes_test[,1:9]$Outcome, levels = expected_levels)
+
 table(predictions, diabetes_test$Outcome)
 
 # Read the following article on how to compute various evaluation metrics using
@@ -408,35 +411,35 @@ print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 ### 1.a. Decision tree for a classification problem without caret ----
 #### Load and split the dataset ----
 library(readr)
-diabetes <- read_csv("data/diabetes.csv")
-View(diabetes)
+breast_cancer <- read_csv("data/breast cancer.csv")
+View(breast_cancer)
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(diabetes$Outcome,
+train_index <- createDataPartition(breast_cancer$diagnosis,
                                    p = 0.7,
                                    list = FALSE)
-diabetes_train <- diabetes[train_index, ]
-diabetes_test <- diabetes[-train_index, ]
+breast_cancer_train <- breast_cancer[train_index, ]
+breast_cancer_test <- breast_cancer[-train_index, ]
 
 #### Train the model ----
-diabetes_model_rpart <- rpart(Outcome ~ ., data = diabetes_train)
+breast_cancer_model_rpart <- rpart(diagnosis ~ ., data = breast_cancer_train)
 
 #### Display the model's details ----
-print(diabetes_model_rpart)
+print(breast_cancer_model_rpart)
 
 #### Make predictions ----
 library(rpart)
-predictions <- predict(diabetes_model_rpart,
-                       diabetes_test[, 1:8],
+predictions <- predict(breast_cancer_model_rpart,
+                       breast_cancer_test[, 1:33],
                        type = "class")
-class_predictions <- predict(diabetes_model_rpart, diabetes_test[, 1:9], 
+class_predictions <- predict(breast_cancer_model_rpart, breast_cancer_test[, 1:33], 
                              type = 'class')
 
 #### Display the model's evaluation metrics ----
-table(predictions, pima_indians_diabetes_test$diabetes)
+table(predictions, breast_cancer_test$diagnosis)
 
 confusion_matrix <-
   caret::confusionMatrix(predictions,
-                         pima_indians_diabetes_test[, 1:9]$diabetes)
+                         breast_cancer_test[, 1:32]$diagnosis)
 print(confusion_matrix)
 
 fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
@@ -444,40 +447,42 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 
 ### 1.b. Decision tree for a regression problem without CARET ----
 #### Load and split the dataset ----
-data(BostonHousing)
+library(readr)
+Walmart <- read_csv("data/Walmart.csv")
+View(Walmart)
 
 # Define an 80:20 train:test data split of the dataset.
-train_index <- createDataPartition(BostonHousing$medv,
+train_index <- createDataPartition(Walmart$Unemployment,
                                    p = 0.8,
                                    list = FALSE)
-boston_housing_train <- BostonHousing[train_index, ]
-boston_housing_test <- BostonHousing[-train_index, ]
+Walmart_train <- Walmart[train_index, ]
+bWalmart_test <- Walmart[-train_index, ]
 
 #### Train the model ----
-housing_model_cart <- rpart(medv ~ ., data = boston_housing_train,
+Walmart_model_cart <- rpart(Unemployment ~ ., data = Walmart_train,
                             control = rpart.control(minsplit=5))
 
 #### Display the model's details ----
-print(housing_model_cart)
+print(Walmart_model_cart)
 
 #### Make predictions ----
-predictions <- predict(housing_model_cart, boston_housing_test[, 1:13])
+predictions <- predict(Walmart_model_cart, Walmart_test[, 1:7])
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
-rmse <- sqrt(mean((boston_housing_test$medv - predictions)^2))
+rmse <- sqrt(mean((Walmart_test$Unemployment - predictions)^2))
 print(paste("RMSE =", sprintf(rmse, fmt = "%#.4f")))
 
 ##### SSR ----
 # SSR is the sum of squared residuals (the sum of squared differences
 # between observed and predicted values)
-ssr <- sum((boston_housing_test$medv - predictions)^2)
+ssr <- sum((Walmart_test$Unemployment - predictions)^2)
 print(paste("SSR =", sprintf(ssr, fmt = "%#.4f")))
 
 ##### SST ----
 # SST is the total sum of squares (the sum of squared differences
 # between observed values and their mean)
-sst <- sum((boston_housing_test$medv - mean(boston_housing_test$medv))^2)
+sst <- sum((Walmart_test$Unemployment - mean(Walmart_test$Unemployment))^2)
 print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 
 ##### R Squared ----
@@ -491,35 +496,37 @@ print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 # interpret. For example, if you are predicting the amount paid in rent,
 # and the MAE is KES. 10,000, it means, on average, your model's predictions
 # are off by about KES. 10,000.
-absolute_errors <- abs(predictions - boston_housing_test$medv)
+absolute_errors <- abs(predictions - Walmart_test$Unemployment)
 mae <- mean(absolute_errors)
 print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
 ### 1.c. Decision tree for a classification problem with caret ----
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+library(readr)
+diabetes <- read_csv("data/diabetes.csv")
+View(diabetes)
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(diabetes$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+diabetes_train <- diabetes[train_index, ]
+diabetes_test <- diabetes[-train_index, ]
 
 #### Train the model ----
 set.seed(7)
 # We apply the 5-fold cross validation resampling method
 train_control <- trainControl(method = "cv", number = 5)
-diabetes_caret_model_rpart <- train(diabetes ~ ., data = PimaIndiansDiabetes,
+diabetes_caret_model_rpart <- train(Outcome ~ ., data = diabetes,
                                     method = "rpart", metric = "Accuracy",
                                     trControl = train_control)
 
 #### Display the model's details ----
-print(diabetes_caret_model_rpart)
+print(IRIS_caret_model_rpart)
 
 #### Make predictions ----
-predictions <- predict(diabetes_model_rpart,
-                       pima_indians_diabetes_test[, 1:8],
+predictions <- predict(IRIS_model_rpart,
+                       IRIS_test[, 1:5],
                        type = "class")
 
 #### Display the model's evaluation metrics ----
