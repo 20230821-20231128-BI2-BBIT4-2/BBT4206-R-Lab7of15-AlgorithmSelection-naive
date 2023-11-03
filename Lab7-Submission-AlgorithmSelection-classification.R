@@ -197,41 +197,39 @@ if (require("rpart")) {
 # model using ordinary least squares (OLS).
 
 #### Load and split the dataset ----
-library(readr)
-Walmart <- read_csv("data/Walmart.csv")
-View(Walmart)
+data("ToothGrowth")
 
 # Define an 80:20 train:test data split of the dataset.
-train_index <- createDataPartition(Walmart$Unemployment,
+train_index <- createDataPartition(ToothGrowth$dose,
                                    p = 0.8,
                                    list = FALSE)
-Walmart_train <- Walmart[train_index, ]
-Walmart_test <- Walmart[-train_index, ]
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
 
 #### Train the model ----
-Walmart_model_lm <- lm(Unemployment ~ ., Walmart_train)
+ToothGrowth_model_lm <- lm(dose ~ ., ToothGrowth_train)
 
 #### Display the model's details ----
-print(Walmart_model_lm)
+print(ToothGrowth_model_lm)
 
 #### Make predictions ----
-predictions <- predict(Walmart_model_lm, Walmart_test[, 1:7])
+predictions <- predict(ToothGrowth_model_lm, ToothGrowth_test[, 1:2])
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
-rmse <- sqrt(mean((Walmart_test$Unemployment - predictions)^2))
+rmse <- sqrt(mean((ToothGrowth_test$dose - predictions)^2))
 print(paste("RMSE =", sprintf(rmse, fmt = "%#.4f")))
 
 ##### SSR ----
 # SSR is the sum of squared residuals (the sum of squared differences
 # between observed and predicted values)
-ssr <- sum((Walmart_test$Unemployment - predictions)^2)
+ssr <- sum((ToothGrowth_test$dose - predictions)^2)
 print(paste("SSR =", sprintf(ssr, fmt = "%#.4f")))
 
 ##### SST ----
 # SST is the total sum of squares (the sum of squared differences
 # between observed values and their mean)
-sst <- sum((Walmart_test$Unemployment - mean(Walmart_test$Unemployment))^2)
+sst <- sum((ToothGrowth_test$dose - mean(ToothGrowth_test$dose))^2)
 print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 
 ##### R Squared ----
@@ -245,7 +243,7 @@ print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 # interpret. For example, if you are predicting the amount paid in rent,
 # and the MAE is KES. 10,000, it means, on average, your model's predictions
 # are off by about KES. 10,000.
-absolute_errors <- abs(predictions - Walmart_test$Unemployment)
+absolute_errors <- abs(predictions - ToothGrowth_test$dose)
 mae <- mean(absolute_errors)
 print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
@@ -298,31 +296,29 @@ table(predictions, diabetes_test$Outcome)
 # multi-class classification problem.
 
 #### Load and split the dataset ----
-library(readr)
-diabetes <- read_csv("data/diabetes.csv")
-View(diabetes)
+data("ToothGrowth")
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(diabetes$Outcome,
+train_index <- createDataPartition(ToothGrowth$dose,
                                    p = 0.7,
                                    list = FALSE)
-diabetes_train <- diabetes[train_index, ]
-diabetes_test <- diabetes[-train_index, ]
+ToothGrowth_train <- ToothGrowth[train_index, ]
+ToothGrowth_test <- ToothGrowth[-train_index, ]
 
 #### Train the model ----
-diabetes_lda <- lda(Outcome ~ ., data = diabetes_train)
+ToothGrowth_lda <- lda(dose ~ ., data = ToothGrowth_train)
 
 #### Display the model's details ----
-print(diabetes_lda)
+print(ToothGrowth_lda)
 
 #### Make predictions ----
-predictions <- predict(diabetes_lda,
-                       diabetes_test[, 1:8])$Outcome
+predictions <- predict(ToothGrowth_lda,
+                       ToothGrowth_test[, 1:2])$dose
 
 #### Display the model's evaluation metrics ----
-expected_levels <- c("pos","neg")
-diabetes_test[,1:9]$Outcome <-factor(diabetes_test[,1:9]$Outcome, levels = expected_levels)
+expected_levels <- c("0.5","1.0","2.0")
+ToothGrowth_test[,1:3]$dose <-factor(ToothGrowth_test[,1:3]$dose, levels = expected_levels)
 
-table(predictions, diabetes_test$Outcome)
+table(predictions, ToothGrowth_test$dose)
 
 # Read the following article on how to compute various evaluation metrics using
 # the confusion matrix:
@@ -456,7 +452,7 @@ train_index <- createDataPartition(Walmart$Unemployment,
                                    p = 0.8,
                                    list = FALSE)
 Walmart_train <- Walmart[train_index, ]
-bWalmart_test <- Walmart[-train_index, ]
+Walmart_test <- Walmart[-train_index, ]
 
 #### Train the model ----
 Walmart_model_cart <- rpart(Unemployment ~ ., data = Walmart_train,
@@ -611,58 +607,57 @@ print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 # We use the naiveBayes function inside the e1071 package
 #### Load and split the dataset ----
 library(readr)
-breast_cancer <- read_csv("data/breast cancer.csv")
-View(breast_cancer)
+diabetes <- read_csv("data/diabetes.csv")
+View(diabetes)
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(breast_cancer$diagnosis,
+train_index <- createDataPartition(diabetes$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-breast_cancer_train <- breast_cancer[train_index, ]
-breast_cancer_test <- breast_cancer[-train_index, ]
+diabetes_train <- diabetes[train_index, ]
+diabetes_test <- diabetes[-train_index, ]
 
 #### Train the model ----
-breast_cancer_model_nb <- naiveBayes(diagnosis ~ .,
-                                data = breast_cancer_train)
+diabetes_model_nb <- naiveBayes(Outcome ~ .,
+                                data = diabetes_train)
 
 #### Display the model's details ----
-print(breast_cancer_model_nb)
+print(diabetes_model_nb)
 
 #### Make predictions ----
-predictions <- predict(breast_cancer_model_nb,
-                       breast_cancer_test[, 1:32])
+predictions <- predict(diabetes_model_nb,
+                       diabetes_test[, 1:8])
 
 #### Display the model's evaluation metrics ----
 levels(predictions)
-levels(breast_cancer_test[, 1:33]$diagnosis)
+levels(ToothGrowth_test[, 1:3]$dose)
 # Make sure both predictions and reference have the same factor levels
-predictions <- factor(predictions, levels = levels(breast_cancer_test[, 1:33]$diagnosis))
+predictions <- factor(predictions, levels = levels(diabetes_test[, 1:9]$Outcome))
 
+table(predictions, diabetes_test$Outcome)
 confusion_matrix <-
   caret::confusionMatrix(predictions,
-                         breast_cancer_test[, 1:33]$diagnosis)
+                         diabetes_test[, 1:9]$Outcome)
 print(confusion_matrix)
 
 fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
              main = "Confusion Matrix")
-
 ### 2.b. Naïve Bayes Classifier for a Classification Problem with CARET ----
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
-
+data("PimaIndiansDiabetes2")
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(PimaIndiansDiabetes2$diabetes,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+PimaIndiansDiabetes2_train <- PimaIndiansDiabetes2[train_index, ]
+PimaIndiansDiabetes2_test <- PimaIndiansDiabetes2[-train_index, ]
 
 #### Train the model ----
 # We apply the 5-fold cross validation resampling method
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 5)
-diabetes_caret_model_nb <- train(diabetes ~ .,
-                                 data = pima_indians_diabetes_train,
+PimaIndiansDiabetes2_caret_model_nb <- train(diabetes ~ .,
+                                 data = PimaIndiansDiabetes2_train,
                                  method = "nb", metric = "Accuracy",
                                  trControl = train_control)
 
@@ -689,33 +684,35 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 
 ### 3.a. kNN for a classification problem without CARET's train function ----
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+library(readr)
+diabetes <- read_csv("data/diabetes.csv")
+View(diabetes)
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(diabetes$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+diabetes_train <- diabetes[train_index, ]
+diabetes_test <- diabetes[-train_index, ]
 
 #### Train the model ----
-diabetes_caret_model_knn <- knn3(diabetes ~ ., data = pima_indians_diabetes_train, k=3)
+diabetes_caret_model_knn <- knn3(Outcome ~ ., data = diabetes_train, k=3)
 
 #### Display the model's details ----
 print(diabetes_caret_model_knn)
 
 #### Make predictions ----
 predictions <- predict(diabetes_caret_model_knn,
-                       pima_indians_diabetes_test[, 1:8],
+                       diabetes_test[, 1:8],
                        type = "class")
 
 #### Display the model's evaluation metrics ----
-table(predictions, pima_indians_diabetes_test$diabetes)
+table(predictions, diabetes_test$Outcome)
 
 # Or alternatively:
 confusion_matrix <-
   caret::confusionMatrix(predictions,
-                         pima_indians_diabetes_test$diabetes)
+                         diabetes_test$Outcome)
 print(confusion_matrix)
 
 fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
@@ -723,20 +720,22 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 
 ### 3.b. kNN for a regression problem without CARET's train function ----
 #### Load the dataset ----
-data(BostonHousing)
-BostonHousing$chas <- # nolint: object_name_linter.
-  as.numeric(as.character(BostonHousing$chas))
-x <- as.matrix(BostonHousing[, 1:13])
-y <- as.matrix(BostonHousing[, 14])
+library(readr)
+diabetes <- read_csv("data/diabetes.csv")
+View(diabetes)
+diabetes$Outcome <- # nolint: object_name_linter.
+  as.numeric(as.character(diabetes$Outcome))
+x <- as.matrix(diabetes[, 1:8])
+y <- as.matrix(diabetes[, 9])
 
 #### Train the model ----
-housing_model_knn <- knnreg(x, y, k = 3)
+diabetes_model_knn <- knnreg(x, y, k = 3)
 
 #### Display the model's details ----
-print(housing_model_knn)
+print(diabetes_model_knn)
 
 #### Make predictions ----
-predictions <- predict(housing_model_knn, x)
+predictions <- predict(diabetes_model_knn, x)
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
@@ -762,36 +761,42 @@ print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
 ### 3.c. kNN for a classification problem with CARET's train function ----
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+library(readr)
+diabetes <- read_csv("data/diabetes.csv")
+View(diabetes)
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(diabetes$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+diabetes_train <- diabetes[train_index, ]
+diabetes_test <- diabetes[-train_index, ]
 
 #### Train the model ----
 # We apply the 10-fold cross validation resampling method
 # We also apply the standardize data transform
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 10)
-diabetes_caret_model_knn <- train(diabetes ~ ., data = PimaIndiansDiabetes,
+diabetes_caret_model_knn <- train(Outcome ~ ., data = diabetes,
                                   method = "knn", metric = "Accuracy",
                                   preProcess = c("center", "scale"),
                                   trControl = train_control)
+diabetes$Outcome <- factor(diabetes$Outcome, levels = c("0", "1"))
+diabetes_caret_model_logreg <- train(Outcome ~ ., data = diabetes,
+                                     method = "glm", family = "binomial",
+                                     metric = "Accuracy", trControl = train_control)
 
 #### Display the model's details ----
 print(diabetes_caret_model_knn)
 
 #### Make predictions ----
 predictions <- predict(diabetes_caret_model_knn,
-                       pima_indians_diabetes_test[, 1:8])
+                       diabetes_test[, 1:8])
 
 #### Display the model's evaluation metrics ----
 confusion_matrix <-
   caret::confusionMatrix(predictions,
-                         pima_indians_diabetes_test[, 1:9]$diabetes)
+                         diabetes_test[, 1:9]$Outcome)
 print(confusion_matrix)
 
 fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
@@ -799,21 +804,23 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 
 ### 3.d. kNN for a regression problem with CARET's train function ----
 #### Load and split the dataset ----
-data(BostonHousing)
+data("BostonHousing2")
 
 # Define an 80:20 train:test data split of the dataset.
-train_index <- createDataPartition(BostonHousing$medv,
+train_index <- createDataPartition(BostonHousing2$medv,
                                    p = 0.8,
                                    list = FALSE)
-boston_housing_train <- BostonHousing[train_index, ]
-boston_housing_test <- BostonHousing[-train_index, ]
+BostonHousing2_train <- BostonHousing2[train_index, ]
+BostonHousing2_test <- BostonHousing2[-train_index, ]
 
 #### Train the model ----
 # We apply the 5-fold cross validation resampling method
 # We also apply the standardize data transform
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 5)
-housing_caret_model_knn <- train(medv ~ ., data = BostonHousing,
+
+
+housing_caret_model_knn <- train(medv ~ ., data = BostonHousing2,
                                  method = "knn", metric = "RMSE",
                                  preProcess = c("center", "scale"),
                                  trControl = train_control)
@@ -823,23 +830,23 @@ print(housing_caret_model_knn)
 
 #### Make predictions ----
 predictions <- predict(housing_caret_model_knn,
-                       boston_housing_test[, 1:13])
+                       BostonHousing2_test[, 1:19])
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
-rmse <- sqrt(mean((boston_housing_test$medv - predictions)^2))
+rmse <- sqrt(mean((BostonHousing2_test$medv - predictions)^2))
 print(paste("RMSE =", sprintf(rmse, fmt = "%#.4f")))
 
 ##### SSR ----
 # SSR is the sum of squared residuals (the sum of squared differences
 # between observed and predicted values)
-ssr <- sum((boston_housing_test$medv - predictions)^2)
+ssr <- sum((BostonHousing2_test$medv - predictions)^2)
 print(paste("SSR =", sprintf(ssr, fmt = "%#.4f")))
 
 ##### SST ----
 # SST is the total sum of squares (the sum of squared differences
 # between observed values and their mean)
-sst <- sum((boston_housing_test$medv - mean(boston_housing_test$medv))^2)
+sst <- sum((BostonHousing2_test$medv - mean(BostonHousing2_test$medv))^2)
 print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 
 ##### R Squared ----
@@ -853,39 +860,41 @@ print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 # interpret. For example, if you are predicting the amount paid in rent,
 # and the MAE is KES. 10,000, it means, on average, your model's predictions
 # are off by about KES. 10,000.
-absolute_errors <- abs(predictions - boston_housing_test$medv)
+absolute_errors <- abs(predictions - BostonHousing2_test$medv)
 mae <- mean(absolute_errors)
 print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
 ## 4.  Support Vector Machine ----
 ### 4.a. SVM Classifier for a classification problem without CARET ----
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+library(readr)
+diabetes <- read_csv("data/diabetes.csv")
+View(diabetes)
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(diabetes$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+diabetes_train <- diabetes[train_index, ]
+diabetes_test <- diabetes[-train_index, ]
 
 #### Train the model ----
-diabetes_model_svm <- ksvm(diabetes ~ ., data = pima_indians_diabetes_train,
+diabetes_model_svm <- ksvm(Outcome ~ ., data = diabetes_train,
                            kernel = "rbfdot")
 
 #### Display the model's details ----
 print(diabetes_model_svm)
 
 #### Make predictions ----
-predictions <- predict(diabetes_model_svm, pima_indians_diabetes_test[, 1:8],
+predictions <- predict(diabetes_model_svm, diabetes_test[, 1:8],
                        type = "response")
 
 #### Display the model's evaluation metrics ----
-table(predictions, pima_indians_diabetes_test$diabetes)
+table(predictions, diabetes_test$Outcome)
 
 confusion_matrix <-
   caret::confusionMatrix(predictions,
-                         pima_indians_diabetes_test[, 1:9]$diabetes)
+                         diabetes_test[, 1:9]$Outcome)
 print(confusion_matrix)
 
 fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
@@ -893,39 +902,39 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 
 ### 4.b. SVM Classifier for a regression problem without CARET ----
 #### Load and split the dataset ----
-data(BostonHousing)
+data("BostonHousing2")
 
 # Define an 80:20 train:test data split of the dataset.
-train_index <- createDataPartition(BostonHousing$medv,
+train_index <- createDataPartition(BostonHousing2$medv,
                                    p = 0.8,
                                    list = FALSE)
-boston_housing_train <- BostonHousing[train_index, ]
-boston_housing_test <- BostonHousing[-train_index, ]
+BostonHousing2_train <- BostonHousing2[train_index, ]
+BostonHousing2_test <- BostonHousing2[-train_index, ]
 
 #### Train the model ----
-housing_model_svm <- ksvm(medv ~ ., boston_housing_train, kernel = "rbfdot")
+housing_model_svm <- ksvm(medv ~ ., BostonHousing2_train, kernel = "rbfdot")
 
 #### Display the model's details ----
 print(housing_model_svm)
 
 #### Make predictions ----
-predictions <- predict(housing_model_svm, boston_housing_test)
+predictions <- predict(housing_model_svm, BostonHousing2_test)
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
-rmse <- sqrt(mean((boston_housing_test$medv - predictions)^2))
+rmse <- sqrt(mean((BostonHousing2_test$medv - predictions)^2))
 print(paste("RMSE =", sprintf(rmse, fmt = "%#.4f")))
 
 ##### SSR ----
 # SSR is the sum of squared residuals (the sum of squared differences
 # between observed and predicted values)
-ssr <- sum((boston_housing_test$medv - predictions)^2)
+ssr <- sum((BostonHousing2_test$medv - predictions)^2)
 print(paste("SSR =", sprintf(ssr, fmt = "%#.4f")))
 
 ##### SST ----
 # SST is the total sum of squares (the sum of squared differences
 # between observed values and their mean)
-sst <- sum((boston_housing_test$medv - mean(boston_housing_test$medv))^2)
+sst <- sum((BostonHousing2_test$medv - mean(BostonHousing2_test$medv))^2)
 print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 
 ##### R Squared ----
@@ -939,7 +948,7 @@ print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 # interpret. For example, if you are predicting the amount paid in rent,
 # and the MAE is KES. 10,000, it means, on average, your model's predictions
 # are off by about KES. 10,000.
-absolute_errors <- abs(predictions - boston_housing_test$medv)
+absolute_errors <- abs(predictions - BostonHousing2_test$medv)
 mae <- mean(absolute_errors)
 print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
@@ -947,20 +956,28 @@ print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 # The SVM with Radial Basis kernel implementation can be used with caret for
 # classification as follows:
 #### Load and split the dataset ----
-data(PimaIndiansDiabetes)
+library(readr)
+diabetes <- read_csv("data/diabetes.csv")
+View(diabetes)
 
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(PimaIndiansDiabetes$diabetes,
+train_index <- createDataPartition(diabetes$Outcome,
                                    p = 0.7,
                                    list = FALSE)
-pima_indians_diabetes_train <- PimaIndiansDiabetes[train_index, ]
-pima_indians_diabetes_test <- PimaIndiansDiabetes[-train_index, ]
+diabetes_train <- diabetes[train_index, ]
+diabetes_test <- diabetes[-train_index, ]
 
 #### Train the model ----
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 5)
+diabetes$Outcome <- factor(diabetes$Outcome, levels = c("0", "1"))
+diabetes_caret_model_logreg <- train(Outcome ~ ., data = diabetes,
+                                     method = "glm", family = "binomial",
+                                     metric = "Accuracy", trControl = train_control)
+
+
 diabetes_caret_model_svm_radial <- # nolint: object_length_linter.
-  train(diabetes ~ ., data = pima_indians_diabetes_train, method = "svmRadial",
+  train(Outcome ~ ., data = diabetes_train, method = "svmRadial",
         metric = "Accuracy", trControl = train_control)
 
 #### Display the model's details ----
@@ -968,13 +985,13 @@ print(diabetes_caret_model_svm_radial)
 
 #### Make predictions ----
 predictions <- predict(diabetes_caret_model_svm_radial,
-                       pima_indians_diabetes_test[, 1:8])
+                       diabetes_test[, 1:8])
 
 #### Display the model's evaluation metrics ----
-table(predictions, pima_indians_diabetes_test$diabetes)
+table(predictions, diabetes_test$Outcome)
 confusion_matrix <-
   caret::confusionMatrix(predictions,
-                         pima_indians_diabetes_test[, 1:9]$diabetes)
+                         diabetes_test[, 1:9]$Outcome)
 print(confusion_matrix)
 
 fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
@@ -984,20 +1001,20 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 # The SVM with radial basis kernel implementation can be used with caret for
 # regression as follows:
 #### Load and split the dataset ----
-data(BostonHousing)
+data(BostonHousing2)
 
 # Define an 80:20 train:test data split of the dataset.
-train_index <- createDataPartition(BostonHousing$medv,
+train_index <- createDataPartition(BostonHousing2$medv,
                                    p = 0.8,
                                    list = FALSE)
-boston_housing_train <- BostonHousing[train_index, ]
-boston_housing_test <- BostonHousing[-train_index, ]
+BostonHousing2_train <- BostonHousing2[train_index, ]
+BostonHousing2_test <- BostonHousing2[-train_index, ]
 
 #### Train the model ----
 set.seed(7)
 train_control <- trainControl(method = "cv", number = 5)
 housing_caret_model_svm_radial <-
-  train(medv ~ ., data = boston_housing_train,
+  train(medv ~ ., data = BostonHousing2_train,
         method = "svmRadial", metric = "RMSE",
         trControl = train_control)
 
@@ -1006,23 +1023,23 @@ print(housing_caret_model_svm_radial)
 
 #### Make predictions ----
 predictions <- predict(housing_caret_model_svm_radial,
-                       boston_housing_test[, 1:13])
+                       BostonHousing2_test[, 1:19])
 
 #### Display the model's evaluation metrics ----
 ##### RMSE ----
-rmse <- sqrt(mean((boston_housing_test$medv - predictions)^2))
+rmse <- sqrt(mean((BostonHousing2_test$medv - predictions)^2))
 print(paste("RMSE =", sprintf(rmse, fmt = "%#.4f")))
 
 ##### SSR ----
 # SSR is the sum of squared residuals (the sum of squared differences
 # between observed and predicted values)
-ssr <- sum((boston_housing_test$medv - predictions)^2)
+ssr <- sum((BostonHousing2_test$medv - predictions)^2)
 print(paste("SSR =", sprintf(ssr, fmt = "%#.4f")))
 
 ##### SST ----
 # SST is the total sum of squares (the sum of squared differences
 # between observed values and their mean)
-sst <- sum((boston_housing_test$medv - mean(boston_housing_test$medv))^2)
+sst <- sum((BostonHousing2_test$medv - mean(BostonHousing2_test$medv))^2)
 print(paste("SST =", sprintf(sst, fmt = "%#.4f")))
 
 ##### R Squared ----
@@ -1036,7 +1053,7 @@ print(paste("R Squared =", sprintf(r_squared, fmt = "%#.4f")))
 # interpret. For example, if you are predicting the amount paid in rent,
 # and the MAE is KES. 10,000, it means, on average, your model's predictions
 # are off by about KES. 10,000.
-absolute_errors <- abs(predictions - boston_housing_test$medv)
+absolute_errors <- abs(predictions - BostonHousing2_test$medv)
 mae <- mean(absolute_errors)
 print(paste("MAE =", sprintf(mae, fmt = "%#.4f")))
 
