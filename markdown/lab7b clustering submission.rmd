@@ -102,6 +102,8 @@ if (require("dplyr")) {
   install.packages("dplyr", dependencies = TRUE,
                    repos = "https://cloud.r-project.org")
 }
+if (!is.element("mlbench", installed.packages()[, 1])) {}
+  require("mlbench") #nolint
 ```
 # Step2 Load the dataset
 ```{r}
