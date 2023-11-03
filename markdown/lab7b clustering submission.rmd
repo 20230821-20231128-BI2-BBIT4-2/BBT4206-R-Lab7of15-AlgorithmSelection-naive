@@ -1,0 +1,337 @@
+---
+title: "Business Intelligence Lab Submission Markdown"
+author: "naive"
+date: "4/10/2023"
+output:
+  github_document: 
+    toc: yes
+    toc_depth: 4
+    fig_width: 6
+    fig_height: 4
+    df_print: default
+editor_options:
+  chunk_output_type: console
+---
+
+# Student Details
+
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Student ID Numbers and Names of Group Members** | *\<list one student name, class group (just the letter; A, B, or C), and ID per line, e.g., 123456 - A - John Leposo; you should be between 2 and 5 members per group\>* |
+|                                                   |                                                                                                                                                                          |
+|                                                   | 1.  135575 - B - Dennis Nzioki.                                                                                                                                             |
+|                                                   |                                                                                                                                                                          |
+|                                                   | 2.  134645 - B - Vivean Lydiah                                                                                                                                             |
+|                                                   |                                                                                                                                                                          |
+|                                                   | 3.  134765 - B - Nicholas Munene                                                                                                                                             |
+|                                                   |                                                                                                                                                                          |
+|                                                   | 4.  131653- B - Terry Joan                                                                                                                                             |
+|                                                   |                                                                                                                                                                          |
+|                                                   | 5.  124428 - B - Eston Gichuhi                                                                                                                                              |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **GitHub Classroom Group Name**                   | *\<specify the name of the team you created on GitHub classroom\>*                                                                                                       |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Course Code**                                   | BBT4206                                                                                                                                                                  |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Course Name**                                   | Business Intelligence II                                                                                                                                                 |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Program**                                       | Bachelor of Business Information Technology                                                                                                                              |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| **Semester Duration**                             | 21^st^ August 2023 to 28^th^ November 2023                                                                                                                               |
++---------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+
+# Setup Chunk
+
+We start by installing all the required packages
+We start by installing all the required packages
+```{r setup}
+if (require("languageserver")) {
+  require("languageserver")
+} else {
+  install.packages("languageserver", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+if (require("readr")) {
+  require("readr")
+} else {
+  install.packages("readr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## naniar ----
+if (require("naniar")) {
+  require("naniar")
+} else {
+  install.packages("naniar", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## ggplot2 ----
+if (require("ggplot2")) {
+  require("ggplot2")
+} else {
+  install.packages("ggplot2", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## corrplot ----
+if (require("corrplot")) {
+  require("corrplot")
+} else {
+  install.packages("corrplot", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+
+## ggcorrplot ----
+if (require("ggcorrplot")) {
+  require("ggcorrplot")
+} else {
+  install.packages("ggcorrplot", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+## caret ----
+if (require("caret")) {
+  require("caret")
+} else {
+  install.packages("caret", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+## dplyr ----
+if (require("dplyr")) {
+  require("dplyr")
+} else {
+  install.packages("dplyr", dependencies = TRUE,
+                   repos = "https://cloud.r-project.org")
+}
+```
+# Step2 Load the dataset
+```{r}
+# load the dataset PimaIndians Diabetes2 from mlbench package
+data("PimaIndiansDiabetes2")
+
+PimaIndiansDiabetes2$diabetes <- factor(PimaIndiansDiabetes2$diabetes)
+
+str(PimaIndiansDiabetes2)
+dim(PimaIndiansDiabetes2)
+head(PimaIndiansDiabetes2)
+summary(PimaIndiansDiabetes2)
+```
+# Step3: check for any missing data and address it
+```{r}
+# Are there missing values in the dataset?
+any_na(PimaIndiansDiabetes2)
+
+# How many?
+n_miss(PimaIndiansDiabetes2)
+
+# What is the proportion of missing data in the entire dataset?
+prop_miss(PimaIndiansDiabetes2)
+
+# What is the number and percentage of missing values grouped by
+# each variable?
+miss_var_summary(PimaIndiansDiabetes2)
+
+# Which variables contain the most missing values?
+gg_miss_var(PimaIndiansDiabetes2)
+
+# Which combinations of variables are missing together?
+gg_miss_upset(PimaIndiansDiabetes2)
+
+# Where are missing values located (the shaded regions in the plot)?
+vis_miss(PimaIndiansDiabetes2) +
+  theme(axis.text.x = element_text(angle = 80))
+PimaIndiansDiabetes2_removed_obs <-
+  PimaIndiansDiabetes2 %>%
+  dplyr::filter(complete.cases(.))
+## OPTION 1: Remove the observations with missing values ----
+# We can decide to remove all the observations that have missing values
+# as follows:
+PimaIndiansDiabetes2_removed_obs <- PimaIndiansDiabetes2 %>% filter(complete.cases(.))
+
+# The initial dataset had 768 observations and 9 variables
+dim(PimaIndiansDiabetes2)
+
+# The filtered dataset has 392 observations and 9 variables
+dim(PimaIndiansDiabetes2)
+
+# Are there missing values in the dataset?
+any_na(PimaIndiansDiabetes2_removed_obs)
+```
+# STEP 4. Perform EDA and Feature Selection ----
+## Compute the correlations between variables ----
+We identify the correlated variables because it is these correlated variables
+that can then be used to identify the clusters.
+```{r}
+# Create a correlation matrix
+# Option 1: Basic Table
+cor(PimaIndiansDiabetes2_removed_obs[, c(1,2,3,4,5,6,7,8)]) %>%
+  View()
+
+# Option 2: Basic Plot
+cor(PimaIndiansDiabetes2_removed_obs[, c(1,2,3,4,5,6,7,8)]) %>%
+  corrplot(method = "square")
+
+# Option 3: Fancy Plot using ggplot2
+corr_matrix <- cor(PimaIndiansDiabetes2_removed_obs[, c(1,2,3,4,5,6,7,8)])
+
+p <- ggplot2::ggplot(data = reshape2::melt(corr_matrix),
+                     ggplot2::aes(Var1, Var2, fill = value)) +
+  ggplot2::geom_tile() +
+  ggplot2::geom_text(ggplot2::aes(label = label_wrap(label, width = 10)),
+                     size = 4) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+
+ggcorrplot(corr_matrix, hc.order = TRUE, type = "lower", lab = TRUE)
+
+# The correlation plot shows a -0.02 correlation between the pedigree  and the
+# pressure This is worth investigating further if the intention
+# of the model is to diagnose diabetes based on pedigree.
+
+# Room_type, neighbourhood, date and other non-numeric variables and
+# categorical variables are not included in the correlation, but they can be
+# used as an additional dimension when plotting the scatter plot during EDA.
+
+## Plot the scatter plots ----
+# A scatter plot to show pedigree levels against pressure
+# per diabetes level
+ggplot(PimaIndiansDiabetes2_removed_obs,
+       aes(pedigree, pressure,
+           color = diabetes,
+           shape = diabetes)) +
+  geom_point(alpha = 0.5) +
+  xlab("pedigree") +
+  ylab("pressure")
+
+# A scatter plot to show pedigree levels against pressure
+# per age
+ggplot(PimaIndiansDiabetes2_removed_obs,
+       aes(pedigree, pressure,
+           color = age)) +
+  geom_point(alpha = 0.5) +
+  xlab("pedigree") +
+  ylab("pressure")
+
+# A scatter plot to show insulin levels against age
+# per diabetes level
+ggplot(PimaIndiansDiabetes2_removed_obs,
+       aes(insulin, age,
+           color = diabetes,
+           shape = diabetes)) +
+  geom_point(alpha = 0.5) +
+  xlab("Insulin level") +
+  ylab("age")
+
+# A scatter plot to show glucose level against age 
+#per diabetes levels
+ggplot(PimaIndiansDiabetes2_removed_obs,
+       aes(glucose, age,
+           color = diabetes,
+           shape = diabetes)) +
+  geom_point(alpha = 0.5) +
+  xlab("glucose level") +
+  ylab("age")
+
+# A scatter plot to show mass against insulin levels
+#  per diabetes type
+ggplot(PimaIndiansDiabetes2_removed_obs,
+       aes(mass, insulin,
+           color = diabetes,
+           shape = diabetes)) +
+  geom_point(alpha = 0.5) +
+  xlab("mass") +
+  ylab("Insulin level")
+
+## Transform the data ----
+# The K Means Clustering algorithm performs better when data transformation has
+# been applied. This helps to standardize the data making it easier to compare
+# multiple variables.
+
+summary(PimaIndiansDiabetes2_removed_obs)
+model_of_the_transform <- preProcess(PimaIndiansDiabetes2_removed_obs,
+                                     method = c("scale", "center"))
+print(model_of_the_transform)
+PimaIndiansDiabetes2_removed_obs_std <- predict(model_of_the_transform, # nolint
+                                                PimaIndiansDiabetes2_removed_obs)
+summary(PimaIndiansDiabetes2_removed_obs_std)
+sapply(PimaIndiansDiabetes2_removed_obs_std[, c(1, 2, 3, 4, 5, 6, 7, 8)], sd)
+
+## Select the features to use to create the clusters ----
+# OPTION 1: Use all the numeric variables to create the clusters
+PimaIndiansDiabetes2_vars <-
+  PimaIndiansDiabetes2_removed_obs_std[, c(1, 2, 3, 4, 5, 6, 7, 8)]
+```
+#Step5 Create the clusters using the K-Means Clustering Algorithm
+```{r}
+# We start with a random guess of the number of clusters we need
+set.seed(7)
+kmeans_cluster <- kmeans(PimaIndiansDiabetes2_vars, centers = 3, nstart = 20)
+
+# We then decide the maximum number of clusters to investigate
+n_clusters <- 8
+
+# Initialize total within sum of squares error: wss
+wss <- numeric(n_clusters)
+
+set.seed(7)
+
+# Investigate 1 to n possible clusters (where n is the maximum number of 
+# clusters that we want to investigate)
+for (i in 1:n_clusters) {
+  # Use the K Means cluster algorithm to create each cluster
+  kmeans_cluster <- kmeans(PimaIndiansDiabetes2_vars, centers = i, nstart = 20)
+  # Save the within cluster sum of squares
+  wss[i] <- kmeans_cluster$tot.withinss
+}
+
+## Plot a scree plot ----
+# The scree plot should help you to note when additional clusters do not make
+# any significant difference (the plateau).
+wss_df <- tibble(clusters = 1:n_clusters, wss = wss)
+
+scree_plot <- ggplot(wss_df, aes(x = clusters, y = wss, group = 1)) +
+  geom_point(size = 4) +
+  geom_line() +
+  scale_x_continuous(breaks = c(2, 4, 6, 8)) +
+  xlab("Number of Clusters")
+
+scree_plot
+
+# We can add guides to make it easier to identify the plateau (or "elbow").
+scree_plot +
+  geom_hline(
+    yintercept = wss,
+    linetype = "dashed",
+    col = c(rep("#000000", 5), "#FF0000", rep("#000000", 2))
+  )
+
+# The plateau is reached at 6 clusters.
+# We therefore create the final cluster with 6 clusters
+# (not the initial 3 used at the beginning of this STEP.)
+k <- 6
+set.seed(7)
+# Build model with k clusters: kmeans_cluster
+kmeans_cluster <- kmeans(PimaIndiansDiabetes2_vars, centers = k, nstart = 20)
+
+# STEP 6. Add the cluster number as a label for each observation ----
+PimaIndiansDiabetes2_removed_obs$cluster_id <- factor(kmeans_cluster$cluster)
+
+## View the results by plotting scatter plots with the labelled cluster ----
+ggplot(PimaIndiansDiabetes2_removed_obs, aes(pedigree, pressure,
+                                         color = cluster_id)) +
+  geom_point(alpha = 0.5) +
+  xlab("pedigree") +
+  ylab("pressure")
+
+ggplot(PimaIndiansDiabetes2_removed_obs,
+       aes(age, insulin, color = cluster_id)) +
+  geom_point(alpha = 0.5) +
+  xlab("age") +
+  ylab("Insulin level")
+
+ggplot(PimaIndiansDiabetes2_removed_obs,
+       aes(insulin, pregnant,
+           color = cluster_id)) +
+  geom_point(alpha = 0.5) +
+  xlab("Insulin level") +
+  ylab("Pregnancy level")
+```
