@@ -296,29 +296,29 @@ table(predictions, diabetes_test$Outcome)
 # multi-class classification problem.
 
 #### Load and split the dataset ----
-data("ToothGrowth")
+library(readr)
+diabetes <- read_csv("data/diabetes.csv")
+View(diabetes)
+data("PimaIndiansDiabetes2")
 # Define a 70:30 train:test data split of the dataset.
-train_index <- createDataPartition(ToothGrowth$dose,
+train_index <- createDataPartition(PimaIndiansDiabetes2$diabetes,
                                    p = 0.7,
                                    list = FALSE)
-ToothGrowth_train <- ToothGrowth[train_index, ]
-ToothGrowth_test <- ToothGrowth[-train_index, ]
+diabetes_train <- PimaIndiansDiabetes2[train_index, ]
+diabetes_test <- PimaIndiansDiabetes2[-train_index, ]
 
 #### Train the model ----
-ToothGrowth_lda <- lda(dose ~ ., data = ToothGrowth_train)
+diabetes_lda <- lda(diabetes ~ ., data = diabetes_train)
 
 #### Display the model's details ----
-print(ToothGrowth_lda)
+print(diabetes_lda)
 
 #### Make predictions ----
-predictions <- predict(ToothGrowth_lda,
-                       ToothGrowth_test[, 1:2])$dose
+predictions <- predict(diabetes_lda,
+                       diabetes_test[, 1:8])$diabetes
 
-#### Display the model's evaluation metrics ----
-expected_levels <- c("0.5","1.0","2.0")
-ToothGrowth_test[,1:3]$dose <-factor(ToothGrowth_test[,1:3]$dose, levels = expected_levels)
 
-table(predictions, ToothGrowth_test$dose)
+table(predictions, diabetes_test$Outcome)
 
 # Read the following article on how to compute various evaluation metrics using
 # the confusion matrix:
@@ -680,7 +680,7 @@ fourfoldplot(as.table(confusion_matrix), color = c("grey", "lightblue"),
 ## 3.  k-Nearest Neighbours ----
 # The knn3() function is in the caret package and does not create a model.
 # Instead it makes predictions from the training dataset directly.
-# It can be used for classification or regression.
+# It can be used for classification or regression. 
 
 ### 3.a. kNN for a classification problem without CARET's train function ----
 #### Load and split the dataset ----
